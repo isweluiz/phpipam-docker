@@ -13,20 +13,20 @@ Learn more on [phpIPAM homepage](http://phpipam.net)
 Run a MySQL database, dedicated to phpipam
 
 ```bash
-docker run --name phpipam-mysql -e MYSQL_ROOT_PASSWORD=my-secret-pw -v /my_dir/phpipam:/var/lib/mysql -d mysql:5.6
+$ docker run --name phpipam-mysql -e MYSQL_ROOT_PASSWORD="my-secret-pw" -v /my_dir/phpipam:/var/lib/mysql -d mariadb:10.2
 ```
 
 Here, we store data on the host system under `/my_dir/phpipam` and use a specific root password.
 
 ### Phpipam
 ```bash
-$ docker run --name ipam -e PHPIPAM_MYSQL_PASSWORD="phpipamadmin" -d --link phpipam-mysql:database -v nginx_conf:/etc/nginx/conf.d/ nginx_docs:/var/www/html networkmgmt/phpipam
+$ docker run --name ipam -e PHPIPAM_MYSQL_PASSWORD="my-secret-pw" -d --link phpipam-mysql:database -v nginx_conf:/etc/nginx/conf.d/ -v nginx_docs:/var/www/html networkmgmt/phpipam
 ```
 We are linking the two containers and expose the HTTP port.
 
 ### Nginx
 ```bash
-$ docker run -p 80:80 -d --link ipam:app nginx:alpine
+$ docker run -p 8000:80 -d --link ipam:app -v nginx_conf:/etc/nginx/conf.d/ -v nginx_docs:/var/www/html nginx:alpine
 ```
 
 ### Specific integration (HTTPS, multi-host containers, etc.)
@@ -62,7 +62,7 @@ You can create an all-in-one YAML deployment descriptor with Docker compose, lik
 
 ```bash
 $ git clone https://github.com/networkmgmt/phpipam-docker.git
-$ cd ./phpipam-fpm-docker
+$ cd ./phpipam-docker
 $ docker-compose up -d
 ```
 
