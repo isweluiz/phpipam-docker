@@ -1,0 +1,33 @@
+# phpIPAM (PHP-FPM) with nginx stack
+version: '3'
+services:
+
+  app:
+    image: networkmgmt/phpipam
+    links:
+      - database
+    volumes:
+      - nginx_docs:/var/www/html/:rw
+      - nginx_conf:/etc/nginx/conf.d/:rw
+    environment:
+      PHPIPAM_MYSQL_PASSWORD: "phpipamadmin"
+    restart: always
+
+  nginx:
+    image: nginx:1.13-alpine
+    links:
+      - app
+    ports:
+      - 80:80
+    volumes:
+      - nginx_docs:/var/www/html/:rw
+      - nginx_conf:/etc/nginx/conf.d/:rw
+    environment:
+      VIRTUAL_HOST: "ipam.example.com"
+    restart: always
+
+  database:
+    image: mariadb:10.2
+    environment:
+      MYSQL_ROOT_PASSWORD: "phpipamadmin"
+    restart: always
