@@ -31,6 +31,7 @@ RUN set -ex && \
         openldap \
 				fping \
     && \
+		ln -s /usr/sbin/fping /bin/fping && \
     docker-php-ext-configure mysqli --with-mysqli=mysqlnd && \
     docker-php-ext-install -j$(nproc) mysqli && \
     docker-php-ext-install -j$(nproc) pdo_mysql && \
