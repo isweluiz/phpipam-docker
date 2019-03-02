@@ -1,0 +1,31 @@
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: firewall-accept-db
+  namespace: phpipam
+  labels:
+    app.kubernetes.io/name: phpipam
+    app.kubernetes.io/instance: my-phpipam
+    app.kubernetes.io/component: phpipam-db
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: phpipam
+      app.kubernetes.io/instance: my-phpipam
+      app.kubernetes.io/component: phpipam-db
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: phpipam
+          app.kubernetes.io/instance: my-phpipam
+          app.kubernetes.io/component: phpipam-frontend
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: phpipam
+          app.kubernetes.io/instance: my-phpipam
+          app.kubernetes.io/component: phpipam-utils
+    ports:
+    - protocol: TCP
+      port: 3306

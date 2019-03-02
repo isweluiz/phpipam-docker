@@ -1,0 +1,17 @@
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: firewall-implicit-deny
+  namespace: phpipam
+  labels:
+    app.kubernetes.io/name: phpipam
+    app.kubernetes.io/instance: my-phpipam
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: phpipam
+      app.kubernetes.io/instance: my-phpipam
+  policyTypes:
+  - Ingress
+  - Egress

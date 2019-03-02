@@ -1,0 +1,28 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: phpipam-env
+  namespace: phpipam
+  labels:
+    app.kubernetes.io/name: phpipam
+    app.kubernetes.io/instance: my-phpipam
+data:
+  PHPIPAM_MYSQL_HOST: "phpipam-db.phpipam.svc.cluster.local"
+  PHPIPAM_MYSQL_USER: "root"
+  PHPIPAM_MYSQL_PASSWORD: "Password12345"
+  PHPIPAM_MYSQL_DB: "phpipam"
+  PHPIPAM_MYSQL_BACKUP_ROTATION: "10"
+  PHPIPAM_PING_CHECK_SEND_MAIL: "false"
+  PHPIPAM_PING_CHECK_METHOD: "false"
+  PHPIPAM_DISCOVERY_CHECK_SEND_MAIL: "false"
+  PHPIPAM_DISCOVERY_CHECK_METHOD: "false"
+  PHPIPAM_REMOVED_ADDR_CHECK_SEND_MAIL: "false"
+  PHPIPAM_REMOVED_ADDR_CHECK_METHOD: "false"
+  PHPIPAM_RESOLVE_EMPTYONLY: "true"
+  PHPIPAM_RESOLVE_VERBOSE: "true"
+  PHPIPAM_PROXY_ENABLED: "false"
+  PHPIPAM_PROXY_SERVER: "proxy.local"
+  PHPIPAM_PROXY_PORT: "8080"
+  PHPIPAM_PROXY_USE_AUTH: "false"
+  PHPIPAM_PROXY_USERNAME: "proxy_user"
+  PHPIPAM_PROXY_PASSWORD: "proxy_passwd"

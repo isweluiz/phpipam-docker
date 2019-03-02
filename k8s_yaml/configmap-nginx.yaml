@@ -1,0 +1,66 @@
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: phpipam-nginx-conf
+  namespace: phpipam
+  labels:
+    app.kubernetes.io/name: phpipam
+    app.kubernetes.io/instance: my-phpipam
+    app.kubernetes.io/component: phpipam-frontend
+data:
+  default.conf: |
+    # inspired by official sample
+    # https://phpipam.net/news/phpipam-on-nginx/
+
+    server {
+        # root directory
+        root   /var/www/html;
+
+        # phpipam
+        location / {
+            try_files $uri $uri/ =404;
+            index index.php;
+
+            error_page 500 /app/error/index.php;
+            error_page 404 /app/error/index.php;
+            error_page 403 /app/error/index.php;
+
+            rewrite ^/login/dashboard/?$ /dashboard/ redirect;
+            rewrite ^/logout/dashboard/?$ /dashboard/ redirect;
+            rewrite ^/tools/search/(.*)/(.*)/(.*)/(.*)/([^/]+)$ /index.php?page=tools§ion=search&addresses=$1&subnets=$2&vlans=$3&vrf=$4&ip=$5 last;
+            rewrite ^/tools/search/(.*) /index.php?page=tools§ion=search&ip=$1 last;
+            rewrite ^/(.*)/(.*)/(.*)/(.*)/(.*)/([^/]+)/? /index.php?page=$1§ion=$2&subnetId=$3&sPage=$4&ipaddrid=$5&tab=$6 last;
+            rewrite ^/(.*)/(.*)/(.*)/(.*)/([^/]+)/? /index.php?page=$1§ion=$2&subnetId=$3&sPage=$4&ipaddrid=$5 last;
+            rewrite ^/(.*)/(.*)/(.*)/([^/]+)/? /index.php?page=$1§ion=$2&subnetId=$3&sPage=$4 last;
+            rewrite ^/(.*)/(.*)/([^/]+)/? /index.php?page=$1§ion=$2&subnetId=$3 last;
+            rewrite ^/(.*)/([^/]+)/? /index.php?page=$1§ion=$2 last;
+            rewrite ^/([^/]+)/? /index.php?page=$1 last;
+        }
+        # phpipam - api
+        location /api {
+            rewrite ^/api/(.*)/(.*)/(.*)/(.*)/(.*) /api/index.php?app_id=$1&controller=$2&id=$3&id2=$4&id3=$5 last;
+            rewrite ^/api/(.*)/(.*)/(.*)/(.*) /api/index.php?app_id=$1&controller=$2&id=$3&id2=$4 last;
+            rewrite ^/api/(.*)/(.*)/(.*) /api/index.php?app_id=$1&controller=$2&id=$3 last;
+            rewrite ^/api/(.*)/(.*) /api/index.php?app_id=$1&controller=$2 last;
+            rewrite ^/api/(.*) /api/index.php?app_id=$1 last;
+        }
+
+        location /css {
+            try_files $uri $uri/ =404;
+        }
+        location /js {
+            try_files $uri $uri/ =404;
+        }
+
+        # php - fpm
+        # rewrite for pod to pod connection
+        location ~ \.php$ {
+            fastcgi_pass   localhost:9000;
+            fastcgi_index  index.php;
+            try_files      $uri $uri/ index.php = 404;
+            fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            fastcgi_param  PATH_INFO $fastcgi_path_info;
+            include        fastcgi_params;
+        }
+    }

@@ -1,0 +1,116 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: phpipam-app
+  namespace: phpipam
+  labels:
+    app.kubernetes.io/name: phpipam
+    app.kubernetes.io/instance: my-phpipam
+    app.kubernetes.io/component: phpipam-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: phpipam
+      app.kubernetes.io/instance: my-phpipam
+      app.kubernetes.io/component: phpipam-frontend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: phpipam
+        app.kubernetes.io/instance: my-phpipam
+        app.kubernetes.io/component: phpipam-frontend
+    spec:
+      initContainers:
+      - image: networkmgmt/phpipam:1.3
+        imagePullPolicy: IfNotPresent
+        name: phpipam-preload
+        resources:
+          requests:
+            cpu: 10m
+            memory: 10Mi
+          limits:
+            cpu: 100m
+            memory: 200Mi
+        command: ["cp"]
+        args: ["-rfvP", "/var/www/html", "/usr/share/dist"]
+        volumeMounts:
+        - mountPath: /usr/share/dist/html
+          subPath: html
+          name: nginx-html
+      containers:
+      - image: networkmgmt/phpipam:1.3
+        imagePullPolicy: IfNotPresent
+        name: phpipam-app
+        resources:
+          requests:
+            cpu: 10m
+            memory: 10Mi
+          limits:
+            cpu: 100m
+            memory: 200Mi
+        ports:
+        - containerPort: 9000
+          protocol: TCP
+          name: php-fpm
+        readinessProbe:
+          tcpSocket:
+            port: php-fpm
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: php-fpm
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        volumeMounts:
+        - mountPath: /var/www/html
+          subPath: html
+          name: nginx-html
+        envFrom:
+        - configMapRef:
+            name: phpipam-env
+      - image: nginx:1.15-alpine
+        imagePullPolicy: IfNotPresent
+        name: phpipam-nginx
+        resources:
+          limits:
+            cpu: 100m
+            memory: 200Mi
+        ports:
+        - containerPort: 80
+          protocol: TCP
+          name: http
+        livenessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 5
+          timeoutSeconds: 1
+        readinessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 5
+          timeoutSeconds: 1
+        volumeMounts:
+        - mountPath: /var/www/html
+          subPath: html
+          name: nginx-html
+        - mountPath: /etc/nginx/conf.d/default.conf
+          subPath: default.conf
+          name: nginx-conf
+          readOnly: true
+      nodeSelector:
+        beta.kubernetes.io/arch: amd64
+      volumes:
+      - name: nginx-html
+        emptyDir: {}
+      - name: nginx-conf
+        configMap:
+          name: phpipam-nginx-conf

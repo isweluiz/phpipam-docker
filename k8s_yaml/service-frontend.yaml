@@ -1,0 +1,21 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: phpipam-frontend
+  namespace: phpipam
+  labels:
+    app.kubernetes.io/name: phpipam
+    app.kubernetes.io/instance: my-phpipam
+    app.kubernetes.io/component: phpipam-frontend
+  annotations:
+    traefik.ingress.kubernetes.io/affinity: "true"
+spec:
+  ports:
+  - name: web
+    port: 8080
+    targetPort: 80
+  selector:
+    app.kubernetes.io/name: phpipam
+    app.kubernetes.io/instance: my-phpipam
+    app.kubernetes.io/component: phpipam-frontend

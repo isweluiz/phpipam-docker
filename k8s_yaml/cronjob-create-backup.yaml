@@ -1,0 +1,74 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: mysql-create-backup
+  namespace: phpipam
+  labels:
+    app.kubernetes.io/name: phpipam
+    app.kubernetes.io/instance: my-phpipam
+    app.kubernetes.io/component: phpipam-db-utils
+spec:
+  schedule: "00 10 * * 0"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 600
+  jobTemplate:
+    metadata:
+      labels:
+        app.kubernetes.io/name: phpipam
+        app.kubernetes.io/instance: my-phpipam
+        app.kubernetes.io/component: phpipam-db-utils
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: phpipam
+            app.kubernetes.io/instance: my-phpipam
+            app.kubernetes.io/component: phpipam-db-utils
+        spec:
+          containers:
+          - image: docker.io/mariadb:10.2
+            imagePullPolicy: IfNotPresent
+            name: mariadb-backup
+            env:
+            - name: MYSQL_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: phpipam-env
+                  key: PHPIPAM_MYSQL_USER
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: phpipam-env
+                  key: PHPIPAM_MYSQL_PASSWORD
+            - name: MYSQL_SERVERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: phpipam-env
+                  key: PHPIPAM_MYSQL_HOST
+            - name: MYSQL_DBNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: phpipam-env
+                  key: PHPIPAM_MYSQL_DB
+            resources:
+              requests:
+                cpu: 10m
+                memory: 10Mi
+              limits:
+                cpu: 200m
+                memory: 200Mi
+            volumeMounts:
+            - name: mariadb-backup-persistent-storage
+              mountPath: /backup
+            command: ["/bin/sh"]
+            args:
+              - -c
+              - /usr/bin/mysqldump -u${MYSQL_USER} -p${MYSQL_PASSWORD} -h${MYSQL_SERVERNAME} ${MYSQL_DBNAME} > /backup/mysql_$(date +%Y%m%d_%H%M).dump
+          nodeSelector:
+            beta.kubernetes.io/arch: amd64
+          restartPolicy: Never
+          volumes:
+          - name: mariadb-backup-persistent-storage
+            persistentVolumeClaim:
+              claimName: phpipam-backup-db-pv-claim
+              readOnly: false

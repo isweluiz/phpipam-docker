@@ -61,9 +61,17 @@ For multi-host containers, expose ports, run etcd or consul to make service disc
 You can create an all-in-one YAML deployment descriptor with Docker compose, like this :
 
 ```bash
-$ git clone https://github.com/networkmgmt/phpipam-docker.git
-$ cd ./phpipam-docker
-$ docker-compose up -d
+git clone https://github.com/networkmgmt/phpipam-docker.git
+cd ./phpipam-docker
+docker-compose up -d
+```
+
+### Kuberenetes (Alpha)
+You can create an all-in-one YAML deployment descriptor with Kubernetes, like this :
+
+```bash
+git clone https://github.com/networkmgmt/phpipam-docker.git
+kubectl apply -Rf ./phpipam-docker/k8s_yaml/
 ```
 
 ### Notes

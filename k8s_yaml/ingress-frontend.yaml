@@ -1,0 +1,25 @@
+---
+kind: Ingress
+apiVersion: extensions/v1beta1
+metadata:
+  name: phpipam-ingress
+  namespace: phpipam
+  labels:
+    app.kubernetes.io/name: phpipam
+    app.kubernetes.io/instance: my-phpipam
+    app.kubernetes.io/component: phpipam-frontend
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+    ingress.kubernetes.io/force-hsts: "true"
+    ingress.kubernetes.io/hsts-max-age: "315360000"
+    ingress.kubernetes.io/hsts-preload: "true"
+    ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  rules:
+  - host: phpipam.cluster.k8s.localnet
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: phpipam-frontend
+          servicePort: web
