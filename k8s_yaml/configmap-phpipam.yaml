@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/name: phpipam
     app.kubernetes.io/instance: my-phpipam
 data:
-  PHPIPAM_MYSQL_HOST: "phpipam-db.phpipam.svc.cluster.local"
+  PHPIPAM_MYSQL_HOST: "phpipam-db"
   PHPIPAM_MYSQL_USER: "root"
   PHPIPAM_MYSQL_PASSWORD: "Password12345"
   PHPIPAM_MYSQL_DB: "phpipam"
